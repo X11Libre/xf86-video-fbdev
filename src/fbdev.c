@@ -1010,7 +1010,7 @@ FBDevScreenInit(SCREEN_INIT_ARGS_DECL)
 	fPtr->CloseScreen = pScreen->CloseScreen;
 	pScreen->CloseScreen = FBDevCloseScreen;
 
-#if XV
+#ifdef XV
 	{
 	    XF86VideoAdaptorPtr *ptr;
 
