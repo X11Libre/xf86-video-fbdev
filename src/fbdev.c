@@ -1141,7 +1141,6 @@ static Bool
 FBDevDGASetMode(ScrnInfoPtr pScrn, DGAModePtr pDGAMode)
 {
     DisplayModePtr pMode;
-    int scrnIdx = pScrn->pScreen->myNum;
     int frameX0, frameY0;
 
     if (pDGAMode) {
