@@ -352,8 +352,7 @@ FBDevProbe(DriverPtr drv, int flags)
 		    isIsa = TRUE;
 		else
 #endif
-		    0;
-		  
+		    { /* empty body for else statements in prior #ifdefs */ }
 	    }
 	    if (fbdevHWProbe(NULL,dev,NULL)) {
 		pScrn = NULL;
