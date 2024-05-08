@@ -205,7 +205,7 @@ FBDevGetRec(ScrnInfoPtr pScrn)
 	if (pScrn->driverPrivate != NULL)
 		return TRUE;
 	
-	pScrn->driverPrivate = xnfcalloc(sizeof(FBDevRec), 1);
+	pScrn->driverPrivate = XNFcallocarray(sizeof(FBDevRec), 1);
 	return TRUE;
 }
 
