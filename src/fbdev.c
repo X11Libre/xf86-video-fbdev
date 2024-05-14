@@ -23,11 +23,6 @@
 /* for visuals */
 #include "fb.h"
 
-#if GET_ABI_MAJOR(ABI_VIDEODRV_VERSION) < 6
-#include "xf86Resources.h"
-#include "xf86RAC.h"
-#endif
-
 #include "fbdevhw.h"
 
 #include "xf86xv.h"
@@ -334,7 +329,6 @@ FBDevProbe(DriverPtr drv, int flags)
 	    return FALSE;
 	    
 	for (i = 0; i < numDevSections; i++) {
-	    Bool isIsa = FALSE;
 	    Bool isPci = FALSE;
 
 	    dev = xf86FindOptionValue(devSections[i]->options,"fbdev");
@@ -345,14 +339,8 @@ FBDevProbe(DriverPtr drv, int flags)
 		    if (!xf86CheckPciSlot(bus,device,func))
 		        continue;
 		    isPci = TRUE;
-		} else
+		}
 #endif
-#ifdef HAVE_ISA
-		if (xf86ParseIsaBusString(devSections[i]->busID))
-		    isIsa = TRUE;
-		else
-#endif
-		    { /* empty body for else statements in prior #ifdefs */ }
 	    }
 	    if (fbdevHWProbe(NULL,dev,NULL)) {
 		pScrn = NULL;
@@ -373,16 +361,6 @@ FBDevProbe(DriverPtr drv, int flags)
 		    xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
 			       "claimed PCI slot %d:%d:%d\n",bus,device,func);
 
-#endif
-		} else if (isIsa) {
-#ifdef HAVE_ISA
-		    int entity;
-		    
-		    entity = xf86ClaimIsaSlot(drv, 0,
-					      devSections[i], TRUE);
-		    pScrn = xf86ConfigIsaEntity(pScrn,0,entity,
-						      NULL,RES_SHARED_VGA,
-						      NULL,NULL,NULL,NULL);
 #endif
 		} else {
 		   int entity;

@@ -60,15 +60,7 @@ XORG_DRIVER_CHECK_EXT(RENDER, renderproto)
 XORG_DRIVER_CHECK_EXT(XV, videoproto)
 
 # Obtain compiler/linker options for the driver dependencies
-PKG_CHECK_MODULES(XORG, [xorg-server >= 1.0.99.901 xproto fontsproto $REQUIRED_MODULES])
-
-save_CFLAGS="$CFLAGS"
-CFLAGS="$XORG_CFLAGS"
-AC_CHECK_DECL(xf86ConfigIsaEntity,
-	      [AC_DEFINE(HAVE_ISA, 1, [Have ISA support])],
-	      [],
-	      [#include "xf86.h"])
-CFLAGS="$save_CFLAGS"
+PKG_CHECK_MODULES(XORG, [xorg-server >= 1.18 xproto fontsproto $REQUIRED_MODULES])
 
 AM_CONDITIONAL(PCIACCESS, [test "x$PCIACCESS" = xyes])
 if test "x$PCIACCESS" = xyes; then
