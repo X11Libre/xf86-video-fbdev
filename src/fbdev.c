@@ -27,8 +27,6 @@
 
 #include "xf86xv.h"
 
-#include "compat-api.h"
-
 #ifdef XSERVER_LIBPCIACCESS
 #include <pciaccess.h>
 #endif
@@ -60,11 +58,11 @@ static Bool	FBDevPciProbe(DriverPtr drv, int entity_num,
      struct pci_device *dev, intptr_t match_data);
 #endif
 static Bool	FBDevPreInit(ScrnInfoPtr pScrn, int flags);
-static Bool	FBDevScreenInit(SCREEN_INIT_ARGS_DECL);
-static Bool	FBDevCloseScreen(CLOSE_SCREEN_ARGS_DECL);
+static Bool	FBDevScreenInit(ScreenPtr pScreen, int argc, char **argv);
+static Bool	FBDevCloseScreen(ScreenPtr pScreen);
 static void *	FBDevWindowLinear(ScreenPtr pScreen, CARD32 row, CARD32 offset, int mode,
 				  CARD32 *size, void *closure);
-static void	FBDevPointerMoved(SCRN_ARG_TYPE arg, int x, int y);
+static void	FBDevPointerMoved(ScrnInfoPtr pScrn, int x, int y);
 static Bool	FBDevDGAInit(ScrnInfoPtr pScrn, ScreenPtr pScreen);
 static Bool	FBDevDriverFunc(ScrnInfoPtr pScrn, xorgDriverFuncOp op,
 				pointer ptr);
@@ -184,7 +182,7 @@ typedef struct {
 	void				*shadow;
 	CloseScreenProcPtr		CloseScreen;
 	CreateScreenResourcesProcPtr	CreateScreenResources;
-	void				(*PointerMoved)(SCRN_ARG_TYPE arg, int x, int y);
+	void				(*PointerMoved)(ScrnInfoPtr pScrn, int x, int y);
 	EntityInfoPtr			pEnt;
 	/* DGA info */
 	DGAModePtr			pDGAMode;
@@ -742,7 +740,7 @@ fbdevSaveScreen(ScreenPtr pScreen, int mode)
 }
 
 static Bool
-FBDevScreenInit(SCREEN_INIT_ARGS_DECL)
+FBDevScreenInit(ScreenPtr pScreen, int argc, char **argv)
 {
 	ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
 	FBDevPtr fPtr = FBDEVPTR(pScrn);
@@ -777,7 +775,7 @@ FBDevScreenInit(SCREEN_INIT_ARGS_DECL)
 		return FALSE;
 	}
 	fbdevHWSaveScreen(pScreen, SCREEN_SAVER_ON);
-	fbdevHWAdjustFrame(ADJUST_FRAME_ARGS(pScrn, 0, 0));
+	fbdevHWAdjustFrame(pScrn, 0, 0);
 
 	/* mi layer */
 	miClearVisualTypes();
@@ -1004,7 +1002,7 @@ FBDevScreenInit(SCREEN_INIT_ARGS_DECL)
 }
 
 static Bool
-FBDevCloseScreen(CLOSE_SCREEN_ARGS_DECL)
+FBDevCloseScreen(ScreenPtr pScreen)
 {
 	ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
 	FBDevPtr fPtr = FBDEVPTR(pScrn);
@@ -1025,7 +1023,7 @@ FBDevCloseScreen(CLOSE_SCREEN_ARGS_DECL)
 
 	pScreen->CreateScreenResources = fPtr->CreateScreenResources;
 	pScreen->CloseScreen = fPtr->CloseScreen;
-	return (*pScreen->CloseScreen)(CLOSE_SCREEN_ARGS);
+	return (*pScreen->CloseScreen)(pScreen);
 }
 
 
@@ -1053,9 +1051,8 @@ FBDevWindowLinear(ScreenPtr pScreen, CARD32 row, CARD32 offset, int mode,
 }
 
 static void
-FBDevPointerMoved(SCRN_ARG_TYPE arg, int x, int y)
+FBDevPointerMoved(ScrnInfoPtr pScrn, int x, int y)
 {
-    SCRN_INFO_PTR(arg);
     FBDevPtr fPtr = FBDEVPTR(pScrn);
     int newX, newY;
 
@@ -1087,7 +1084,7 @@ FBDevPointerMoved(SCRN_ARG_TYPE arg, int x, int y)
     }
 
     /* Pass adjusted pointer coordinates to wrapped PointerMoved function. */
-    (*fPtr->PointerMoved)(arg, newX, newY);
+    (*fPtr->PointerMoved)(pScrn, newX, newY);
 }
 
 
@@ -1133,9 +1130,9 @@ FBDevDGASetMode(ScrnInfoPtr pScrn, DGAModePtr pDGAMode)
 	frameY0 = pScrn->frameY0;
     }
 
-    if (!(*pScrn->SwitchMode)(SWITCH_MODE_ARGS(pScrn, pMode)))
+    if (!(*pScrn->SwitchMode)(pScrn, pMode))
 	return FALSE;
-    (*pScrn->AdjustFrame)(ADJUST_FRAME_ARGS(pScrn, frameX0, frameY0));
+    (*pScrn->AdjustFrame)(pScrn, frameX0, frameY0);
 
     return TRUE;
 }
@@ -1143,7 +1140,7 @@ FBDevDGASetMode(ScrnInfoPtr pScrn, DGAModePtr pDGAMode)
 static void
 FBDevDGASetViewport(ScrnInfoPtr pScrn, int x, int y, int flags)
 {
-    (*pScrn->AdjustFrame)(ADJUST_FRAME_ARGS(pScrn, x, y));
+    (*pScrn->AdjustFrame)(pScrn, x, y);
 }
 
 static int
