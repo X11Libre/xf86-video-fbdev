@@ -17,6 +17,9 @@ fi
 
 .gitlab-ci/common/build-xserver.sh "$PLATFORM" "$XSERVER_REF"
 
+MACH=`gcc -dumpmachine`
+echo "Building on machine $MACH"
+
 case "$PLATFORM" in
     freebsd)
         export PKG_CONFIG_PATH="/usr/lib/pkgconfig:/usr/libdata/pkgconfig:/usr/local/lib/pkgconfig:/usr/local/libdata/pkgconfig"

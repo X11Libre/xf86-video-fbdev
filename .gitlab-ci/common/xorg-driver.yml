@@ -1,11 +1,11 @@
-# version 0.1.16
+# version 0.1.17
 variables:
-    DEBIAN_VERSION:   bullseye-slim
-    DEBIAN_TAG:       "2024-06-06.02"
+    DEBIAN_VERSION:   'bullseye-slim'
+    DEBIAN_TAG:       "2024-06-06.05"
     DEBIAN_EXEC:      'bash .gitlab-ci/common/debian/image-install.sh'
     DEBIAN_SKIP:      "false" # to enable, it has to be litterally "true"
 
-    FREEBSD_TAG:      '2024-06-06.02'
+    FREEBSD_TAG:      '2024-06-06.03'
     FREEBSD_VERSION:  '14.0'
 # image is yet too small for that - need a more complicated way :(
 #    FREEBSD_EXEC:     "bash .gitlab-ci/common/freebsd/image-install.sh"
@@ -62,9 +62,21 @@ check-merge-request:
     needs:
 
 # create debian build image
-image@debian:
+image@debian@amd64:
     extends:
-        - .xorg.distro@debian
+        - .xorg.distro@debian@amd64
+        - .fdo.container-build@debian
+    stage: images
+    variables:
+        GIT_STRATEGY: none
+    rules:
+        - if: $DEBIAN_SKIP != "true"
+          when: always
+    needs:
+
+image@debian@i386:
+    extends:
+        - .xorg.distro@debian@i386
         - .fdo.container-build@debian
     stage: images
     variables:
@@ -75,14 +87,22 @@ image@debian:
     needs:
 
 # inherit this to define FDO_DISTRIBUTION_* variables for Debian
-.xorg.distro@debian:
+.xorg.distro@debian@amd64:
     variables:
         FDO_DISTRIBUTION_VERSION:   "$DEBIAN_VERSION"
         FDO_DISTRIBUTION_EXEC:      "$DEBIAN_EXEC"
-        FDO_DISTRIBUTION_TAG:       "$DEBIAN_TAG"
+        FDO_DISTRIBUTION_TAG:       "amd64-$DEBIAN_TAG"
+        FDO_BASE_IMAGE:             "amd64/debian:$DEBIAN_VERSION"
+
+.xorg.distro@debian@i386:
+    variables:
+        FDO_DISTRIBUTION_VERSION:   "$DEBIAN_VERSION"
+        FDO_DISTRIBUTION_EXEC:      "$DEBIAN_EXEC"
+        FDO_DISTRIBUTION_TAG:       "i386-$DEBIAN_TAG"
+        FDO_BASE_IMAGE:             "i386/debian:$DEBIAN_VERSION"
 
 # overwrite this one if another matrix is needed
-.xorg_driver_matrix@debian:
+.xorg.driver_matrix@debian:
     parallel:
         matrix:
             - CC:           [ "gcc", "clang" ]
@@ -96,11 +116,11 @@ image@debian:
               ]
 
 # default build with meson on Debian
-.xorg_driver_common@debian:
+.xorg.driver_common@debian:
     needs:
-        - image@debian
+        - image@debian@i386
+        - image@debian@amd64
     extends:
-        - .xorg.distro@debian
         - .fdo.distribution-image@debian
     stage: build
     script:
@@ -112,10 +132,17 @@ image@debian:
           when: always
 
 # overwrite this when you need some special Debian build
-build@debian:
+build@debian@amd64:
     extends:
-        - .xorg_driver_matrix@debian
-        - .xorg_driver_common@debian
+        - .xorg.driver_matrix@debian
+        - .xorg.driver_common@debian
+        - .xorg.distro@debian@amd64
+
+build@debian@i386:
+    extends:
+        - .xorg.driver_matrix@debian
+        - .xorg.driver_common@debian
+        - .xorg.distro@debian@i386
 
 # inherit this to define FDO_DISTRIBUTION_* variables for FreeBSD
 .xorg.distro@freebsd:
@@ -137,7 +164,7 @@ image@freebsd:
           when: always
 
 # inherit this to get the default build matrix
-.xorg_driver_matrix@freebsd:
+.xorg.driver_matrix@freebsd:
     parallel:
         matrix:
             - CC:           [ "gcc", "clang" ]
@@ -151,7 +178,7 @@ image@freebsd:
               ]
 
 # common build for driver on FreeBSD. meson and autoconf are both handled by this
-.xorg_driver_common@freebsd:
+.xorg.driver_common@freebsd:
     needs:
         - image@freebsd
     stage: build
@@ -185,5 +212,5 @@ image@freebsd:
 # overwrite this if you need some special FreeBSD build
 build@freebsd:
     extends:
-        - .xorg_driver_matrix@freebsd
-        - .xorg_driver_common@freebsd
+        - .xorg.driver_matrix@freebsd
+        - .xorg.driver_common@freebsd
