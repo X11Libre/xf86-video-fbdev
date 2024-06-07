@@ -30,10 +30,6 @@ do_clone() {
     git clone "$1" --depth 1 --branch="$2"
 }
 
-gpart recover ada0
-gpart resize -i 4 ada0
-growfs /
-
 cp .gitlab-ci/common/freebsd/FreeBSD.conf /etc/pkg
 
 pkg upgrade -f -y
@@ -47,5 +43,17 @@ pkg install -y \
     libspice-server
 
 [ -f /bin/bash ] || ln -sf /usr/local/bin/bash /bin/bash
+
+# Xwayland requires drm 2.4.116 for drmSyncobjEventfd
+# xf86-video-freedreno and xf86-video-omap need extra features
+echo "Installing libdrm"
+do_clone https://gitlab.freedesktop.org/mesa/drm libdrm-2.4.116
+(
+    cd drm
+    git config user.email "buildbot@freebsd"
+    git config user.name "FreeBSD build bot"
+    git am ../.gitlab-ci/common/freebsd/libdrm-2.4.116.patch
+)
+build_meson drm -Dfreedreno=enabled -Dnouveau=enabled -Domap=enabled
 
 echo "=== post-install script END"

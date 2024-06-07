@@ -1,11 +1,11 @@
-# version 0.1.17
+# version 0.1.19
 variables:
     DEBIAN_VERSION:   'bullseye-slim'
-    DEBIAN_TAG:       "2024-06-06.05"
+    DEBIAN_TAG:       "2024-06-06.09"
     DEBIAN_EXEC:      'bash .gitlab-ci/common/debian/image-install.sh'
     DEBIAN_SKIP:      "false" # to enable, it has to be litterally "true"
 
-    FREEBSD_TAG:      '2024-06-06.03'
+    FREEBSD_TAG:      '2024-06-06.06'
     FREEBSD_VERSION:  '14.0'
 # image is yet too small for that - need a more complicated way :(
 #    FREEBSD_EXEC:     "bash .gitlab-ci/common/freebsd/image-install.sh"
@@ -195,7 +195,7 @@ image@freebsd:
         - truncate -s +5G /app/image.raw
         - /app/vmctl start
         - set +e
-        - /app/vmctl exec "gpart recover /dev/ada0 && gpart resize -i4 /dev/ada0 && growfs -y /"
+        - /app/vmctl exec "service growfs onestart"
         - scp -r $PWD "vm:"
         - /app/vmctl exec "cd $CI_PROJECT_NAME && .gitlab-ci/common/freebsd/image-install.sh"
         - /app/vmctl exec "cd $CI_PROJECT_NAME && .gitlab-ci/common/build-driver.sh freebsd $XSERVER_REF" && touch .success

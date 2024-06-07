@@ -80,8 +80,9 @@ do_clone https://gitlab.freedesktop.org/xorg/proto/xorgproto.git xorgproto-2024.
 build_autoconf xorgproto
 
 # Xwayland requires drm 2.4.116 for drmSyncobjEventfd
+# xf86-video-freedreno and xf86-video-omap need extra features
 echo "Installing libdrm"
 do_clone https://gitlab.freedesktop.org/mesa/drm libdrm-2.4.116
-build_meson drm
+build_meson drm -Dfreedreno=enabled -Dnouveau=enabled -Domap=enabled
 
 rm -Rf /tmp/build-deps
