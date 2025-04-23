@@ -14,7 +14,9 @@ fbdev \- video driver for framebuffer device
 .fi
 .SH DESCRIPTION
 .B fbdev
-is an __xservername__ driver for framebuffer devices.
+is an
+.B __xservername__
+driver for framebuffer devices.
 This is a non-accelerated driver,
 the following framebuffer depths are supported: 8, 15, 16, 24.
 All visual types are supported for depth 8,
@@ -24,9 +26,10 @@ Multi-head configurations are supported.
 The
 .B fbdev
 driver supports all hardware where a framebuffer driver is available.
-fbdev uses the os-specific submodule fbdevhw(__drivermansuffix__) to talk
-to the kernel device driver.
-Currently a fbdevhw module is available for linux.
+fbdev uses the os-specific submodule
+.BR fbdevhw (__drivermansuffix__)
+to talk to the kernel device driver.
+Currently a fbdevhw module is available for Linux.
 .SH CONFIGURATION DETAILS
 Please refer to
 .BR __xconfigfile__ (__filemansuffix__)
