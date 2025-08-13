@@ -197,7 +197,7 @@ FBDevGetRec(ScrnInfoPtr pScrn)
 {
 	if (pScrn->driverPrivate != NULL)
 		return TRUE;
-	
+
 	pScrn->driverPrivate = XNFcallocarray(sizeof(FBDevRec), 1);
 	return TRUE;
 }
@@ -263,7 +263,7 @@ static Bool FBDevPciProbe(DriverPtr drv, int entity_num,
 
     if (!xf86LoadDrvSubModule(drv, "fbdevhw"))
 	return FALSE;
-	    
+
     pScrn = xf86ConfigPciEntity(NULL, 0, entity_num, NULL, NULL,
 				NULL, NULL, NULL, NULL);
     if (pScrn) {
@@ -286,7 +286,7 @@ static Bool FBDevPciProbe(DriverPtr drv, int entity_num,
 	    pScrn->ValidMode     = fbdevValidMode;
 
 	    xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
-		       "claimed PCI slot %d@%d:%d:%d\n", 
+		       "claimed PCI slot %d@%d:%d:%d\n",
 		       dev->bus, dev->domain, dev->dev, dev->func);
 	    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
 		       "using %s\n", device ? device : "default device");
@@ -320,12 +320,12 @@ FBDevProbe(DriverPtr drv, int flags)
 	if (flags & PROBE_DETECT)
 		return FALSE;
 
-	if ((numDevSections = xf86MatchDevice(FBDEV_DRIVER_NAME, &devSections)) <= 0) 
+	if ((numDevSections = xf86MatchDevice(FBDEV_DRIVER_NAME, &devSections)) <= 0)
 	    return FALSE;
-	
+
 	if (!xf86LoadDrvSubModule(drv, "fbdevhw"))
 	    return FALSE;
-	    
+
 	for (i = 0; i < numDevSections; i++) {
 	    Bool isPci = FALSE;
 
@@ -346,7 +346,7 @@ FBDevProbe(DriverPtr drv, int flags)
 #ifndef XSERVER_LIBPCIACCESS
 		    /* XXX what about when there's no busID set? */
 		    int entity;
-		    
+
 		    entity = xf86ClaimPciSlot(bus,device,func,drv,
 					      0,devSections[i],
 					      TRUE);
@@ -367,11 +367,11 @@ FBDevProbe(DriverPtr drv, int flags)
 					      devSections[i], TRUE);
 		    pScrn = xf86ConfigFbEntity(pScrn,0,entity,
 					       NULL,NULL,NULL,NULL);
-		   
+
 		}
 		if (pScrn) {
 		    foundScreen = TRUE;
-		    
+
 		    pScrn->driverVersion = FBDEV_VERSION;
 		    pScrn->driverName    = FBDEV_DRIVER_NAME;
 		    pScrn->name          = FBDEV_NAME;
@@ -383,7 +383,7 @@ FBDevProbe(DriverPtr drv, int flags)
 		    pScrn->EnterVT       = fbdevEnterVT;
 		    pScrn->LeaveVT       = fbdevLeaveVT;
 		    pScrn->ValidMode     = fbdevValidMode;
-		    
+
 		    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
 			       "using %s\n", dev ? dev : "default device");
 		}
@@ -571,7 +571,7 @@ FBDevPreInit(ScrnInfoPtr pScrn, int flags)
 	xf86DrvMsg(pScrn->scrnIndex, X_INFO, "checking modes against monitor...\n");
 	{
 		DisplayModePtr mode, first = mode = pScrn->modes;
-		
+
 		if (mode != NULL) do {
 			mode->status = xf86CheckModeForMonitor(mode, pScrn->monitor);
 			mode = mode->next;
@@ -710,7 +710,7 @@ FBDevShadowInit(ScreenPtr pScreen)
 {
     ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
     FBDevPtr fPtr = FBDEVPTR(pScrn);
-    
+
     if (!shadowSetup(pScreen)) {
 	return FALSE;
     }
@@ -1006,7 +1006,7 @@ FBDevCloseScreen(ScreenPtr pScreen)
 {
 	ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
 	FBDevPtr fPtr = FBDEVPTR(pScrn);
-	
+
 	fbdevHWRestore(pScrn);
 	fbdevHWUnmapVidmem(pScrn);
 	if (fPtr->shadow) {
@@ -1238,7 +1238,7 @@ static Bool
 FBDevDriverFunc(ScrnInfoPtr pScrn, xorgDriverFuncOp op, pointer ptr)
 {
     xorgHWFlags *flag;
-    
+
     switch (op) {
 	case GET_REQUIRED_HW_INTERFACES:
 	    flag = (CARD32*)ptr;
