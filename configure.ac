@@ -51,9 +51,6 @@ AC_ARG_WITH(xorg-module-dir,
                            [Default xorg module directory]),
             [moduledir="$withval"],
             [moduledir=`$PKG_CONFIG --variable=moduledir xorg-server`])
-AC_ARG_ENABLE(pciaccess,     AS_HELP_STRING([--enable-pciaccess],
-                             [Enable use of libpciaccess (default: disabled)]),
-			     [PCIACCESS=$enableval], [PCIACCESS=no])
 
 # Store the list of server defined optional extensions in REQUIRED_MODULES
 XORG_DRIVER_CHECK_EXT(RANDR, randrproto)
@@ -62,16 +59,8 @@ XORG_DRIVER_CHECK_EXT(XV, videoproto)
 
 # Obtain compiler/linker options for the driver dependencies
 PKG_CHECK_MODULES(XORG, [xorg-server >= 1.18 xproto fontsproto $REQUIRED_MODULES])
-
-AM_CONDITIONAL(PCIACCESS, [test "x$PCIACCESS" = xyes])
-if test "x$PCIACCESS" = xyes; then
-    AC_DEFINE(PCIACCESS, 1, [Use libpciaccess])
-    PKG_CHECK_MODULES([PCIACCESS], [pciaccess >= 0.8.0])
-    XORG_CFLAGS="$XORG_CFLAGS $PCIACCESS_CFLAGS"
-fi
-
-# Checks for libraries.
-
+PKG_CHECK_MODULES([PCIACCESS], [pciaccess >= 0.8.0])
+XORG_CFLAGS="$XORG_CFLAGS $PCIACCESS_CFLAGS"
 
 AC_SUBST([moduledir])
 

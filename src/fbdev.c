@@ -24,9 +24,7 @@
 
 #include "xf86xv.h"
 
-#ifdef XSERVER_LIBPCIACCESS
 #include <pciaccess.h>
-#endif
 
 /* for xf86{Depth,FbBpp}. i am a terrible person, and i am sorry. */
 #include "xf86Priv.h"
@@ -50,10 +48,8 @@ static Bool debug = 0;
 static const OptionInfoRec * FBDevAvailableOptions(int chipid, int busid);
 static void	FBDevIdentify(int flags);
 static Bool	FBDevProbe(DriverPtr drv, int flags);
-#ifdef XSERVER_LIBPCIACCESS
 static Bool	FBDevPciProbe(DriverPtr drv, int entity_num,
      struct pci_device *dev, intptr_t match_data);
-#endif
 static Bool	FBDevPreInit(ScrnInfoPtr pScrn, int flags);
 static Bool	FBDevScreenInit(ScreenPtr pScreen, int argc, char **argv);
 static Bool	FBDevCloseScreen(ScreenPtr pScreen);
@@ -74,7 +70,6 @@ enum { FBDEV_ROTATE_NONE=0, FBDEV_ROTATE_CW=270, FBDEV_ROTATE_UD=180, FBDEV_ROTA
 #define FBDEV_NAME		"FBDEV"
 #define FBDEV_DRIVER_NAME	"fbdev"
 
-#ifdef XSERVER_LIBPCIACCESS
 static const struct pci_id_match fbdev_device_match[] = {
     {
 	PCI_MATCH_ANY, PCI_MATCH_ANY, PCI_MATCH_ANY, PCI_MATCH_ANY,
@@ -83,7 +78,6 @@ static const struct pci_id_match fbdev_device_match[] = {
 
     { 0, 0, 0 },
 };
-#endif
 
 _X_EXPORT DriverRec FBDEV = {
 	FBDEV_VERSION,
@@ -97,11 +91,8 @@ _X_EXPORT DriverRec FBDEV = {
 	NULL,
 	0,
 	FBDevDriverFunc,
-
-#ifdef XSERVER_LIBPCIACCESS
     fbdev_device_match,
     FBDevPciProbe
-#endif
 };
 
 /* Supported "chipsets" */
@@ -248,7 +239,6 @@ fbdevValidMode(ScrnInfoPtr pScrn, DisplayModePtr mode, Bool verbose, int flags)
     return fbdevHWValidMode(pScrn, mode, verbose, flags);
 }
 
-#ifdef XSERVER_LIBPCIACCESS
 static Bool FBDevPciProbe(DriverPtr drv, int entity_num,
 			  struct pci_device *dev, intptr_t match_data)
 {
@@ -291,8 +281,6 @@ static Bool FBDevPciProbe(DriverPtr drv, int entity_num,
 
     return (pScrn != NULL);
 }
-#endif
-
 
 static Bool
 FBDevProbe(DriverPtr drv, int flags)
@@ -301,9 +289,6 @@ FBDevProbe(DriverPtr drv, int flags)
 	ScrnInfoPtr pScrn;
        	GDevPtr *devSections;
 	int numDevSections;
-#ifndef XSERVER_LIBPCIACCESS
-	int bus,device,func;
-#endif
 	char *dev;
 	Bool foundScreen = FALSE;
 
@@ -324,35 +309,10 @@ FBDevProbe(DriverPtr drv, int flags)
 
 	    dev = xf86FindOptionValue(devSections[i]->options,"fbdev");
 	    if (devSections[i]->busID) {
-#ifndef XSERVER_LIBPCIACCESS
-	        if (xf86ParsePciBusString(devSections[i]->busID,&bus,&device,
-					  &func)) {
-		    if (!xf86CheckPciSlot(bus,device,func))
-		        continue;
-		    isPci = TRUE;
-		}
-#endif
 	    }
 	    if (fbdevHWProbe(NULL,dev,NULL)) {
 		pScrn = NULL;
 		if (isPci) {
-#ifndef XSERVER_LIBPCIACCESS
-		    /* XXX what about when there's no busID set? */
-		    int entity;
-
-		    entity = xf86ClaimPciSlot(bus,device,func,drv,
-					      0,devSections[i],
-					      TRUE);
-		    pScrn = xf86ConfigPciEntity(pScrn,0,entity,
-						      NULL,RES_SHARED_VGA,
-						      NULL,NULL,NULL,NULL);
-		    /* xf86DrvMsg() can't be called without setting these */
-		    pScrn->driverName    = FBDEV_DRIVER_NAME;
-		    pScrn->name          = FBDEV_NAME;
-		    xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
-			       "claimed PCI slot %d:%d:%d\n",bus,device,func);
-
-#endif
 		} else {
 		   int entity;
 
@@ -411,21 +371,8 @@ FBDevPreInit(ScrnInfoPtr pScrn, int flags)
 
 	fPtr->pEnt = xf86GetEntityInfo(pScrn->entityList[0]);
 
-#ifndef XSERVER_LIBPCIACCESS
-	pScrn->racMemFlags = RAC_FB | RAC_COLORMAP | RAC_CURSOR | RAC_VIEWPORT;
-	/* XXX Is this right?  Can probably remove RAC_FB */
-	pScrn->racIoFlags = RAC_FB | RAC_COLORMAP | RAC_CURSOR | RAC_VIEWPORT;
-
-	if (fPtr->pEnt->location.type == BUS_PCI &&
-	    xf86RegisterResources(fPtr->pEnt->index,NULL,ResExclusive)) {
-		xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
-		   "xf86RegisterResources() found resource conflicts\n");
-		return FALSE;
-	}
-#else
 	if (fPtr->pEnt->location.type == BUS_PCI)
 	    pci_dev = fPtr->pEnt->location.id.pci;
-#endif
 	/* open device */
 	if (!fbdevHWInit(pScrn, pci_dev,
 			 xf86FindOptionValue(fPtr->pEnt->device->options,
