@@ -128,8 +128,6 @@ static const OptionInfoRec FBDevOptions[] = {
 
 /* -------------------------------------------------------------------- */
 
-#ifdef XFree86LOADER
-
 MODULESETUPPROTO(FBDevSetup);
 
 static XF86ModuleVersionInfo FBDevVersRec =
@@ -162,8 +160,6 @@ FBDevSetup(pointer module, pointer opts, int *errmaj, int *errmin)
 		return NULL;
 	}
 }
-
-#endif /* XFree86LOADER */
 
 /* -------------------------------------------------------------------- */
 /* our private data, and two functions to allocate/free this            */
