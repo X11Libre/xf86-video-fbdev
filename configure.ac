@@ -46,11 +46,9 @@ AH_TOP([#include "xorg-server.h"])
 
 # Define a configure option for an alternate module directory
 PKG_PROG_PKG_CONFIG([0.25])
-AC_ARG_WITH(xorg-module-dir,
-            AS_HELP_STRING([--with-xorg-module-dir=DIR],
-                           [Default xorg module directory]),
-            [moduledir="$withval"],
-            [moduledir=`$PKG_CONFIG --variable=moduledir xorg-server`])
+
+xlibre_video_drivers_dir=`$PKG_CONFIG --variable=video_drivers_dir xlibre-server`
+AC_SUBST(xlibre_video_drivers_dir)
 
 # Store the list of server defined optional extensions in REQUIRED_MODULES
 XORG_DRIVER_CHECK_EXT(RANDR, randrproto)
@@ -61,8 +59,6 @@ XORG_DRIVER_CHECK_EXT(XV, videoproto)
 PKG_CHECK_MODULES(XORG, [xorg-server >= 25.0.0 xproto fontsproto $REQUIRED_MODULES])
 PKG_CHECK_MODULES([PCIACCESS], [pciaccess >= 0.8.0])
 XORG_CFLAGS="$XORG_CFLAGS $PCIACCESS_CFLAGS"
-
-AC_SUBST([moduledir])
 
 AC_CONFIG_FILES([Makefile src/Makefile man/Makefile])
 AC_OUTPUT
