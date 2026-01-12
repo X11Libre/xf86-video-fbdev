@@ -26,7 +26,7 @@
 AM_CFLAGS = $(BASE_CFLAGS) $(XORG_CFLAGS)
 fbdev_drv_la_LTLIBRARIES = fbdev_drv.la
 fbdev_drv_la_LDFLAGS = -module -avoid-version
-fbdev_drv_ladir = @moduledir@/drivers
+fbdev_drv_ladir = @xlibre_video_drivers_dir@
 
 fbdev_drv_la_SOURCES = \
          fbdev.c
