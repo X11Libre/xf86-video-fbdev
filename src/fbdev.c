@@ -258,7 +258,7 @@ static Bool FBDevPciProbe(DriverPtr drv, int entity_num,
     pScrn = xf86ConfigPciEntity(NULL, 0, entity_num, NULL, NULL,
 				NULL, NULL, NULL, NULL);
     if (pScrn) {
-	char *device;
+	const char *device;
 	GDevPtr devSection = xf86GetDevFromEntity(pScrn->entityList[0],
 						  pScrn->entityInstanceList[0]);
 
@@ -297,7 +297,7 @@ FBDevProbe(DriverPtr drv, int flags)
 	ScrnInfoPtr pScrn;
        	GDevPtr *devSections;
 	int numDevSections;
-	char *dev;
+	const char *dev;
 	Bool foundScreen = FALSE;
 
 	TRACE("probe start");
